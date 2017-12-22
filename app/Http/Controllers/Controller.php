@@ -14,9 +14,10 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs;
 
 	public function split( $ability, $arguments = []){
-		$books = DB::select('select id from book');
+		$books = DB::select('select id from book where id > 1034');
 		foreach($books as $book){
 			$result = DB::select('select * from paragraph where book_id = ' . $book -> id);
+			$update = [];
 			foreach($result as $row){
 				$sentences = preg_split('/(?<=[.?!])\s*(?=[a-z])/i', $row -> content);
 				foreach($sentences as $sentence){
@@ -24,14 +25,15 @@ class Controller extends BaseController
 					$sentence = preg_replace('#\s+#', ' ', $sentence);
 					if(!$sentence = trim($sentence)) continue;
 					if(strpos($sentence, ' ') === false) continue;
-					if(strlen($sentence) < 20) continue;
 
-
-					DB::table('sentence')->insert([
-						['content' => $sentence, 'book_id' => $row -> book_id]
-					]);
+					$update[] = ['content' => $sentence, 'book_id' => $row -> book_id];
 				}
 			}
+
+			foreach(array_chunk($update, 1000) as $chunk){
+                DB::table('sentence') -> insert($chunk);
+            }
+
 		}
 
 		exit('done');
@@ -39,7 +41,6 @@ class Controller extends BaseController
 
 	public function index( $ability, $arguments = [])
 	{
-
 		$result = null;
 //		if(!empty($_POST['searchword'])){
 		$_POST['searchword'] = 'book';
