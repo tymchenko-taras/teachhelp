@@ -14,7 +14,8 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs;
 
 	public function split( $ability, $arguments = []){
-		$books = DB::select('select id from book where id > 1034');
+		exit('stop');
+		$books = DB::select('select id from book');
 		foreach($books as $book){
 			$result = DB::select('select * from paragraph where book_id = ' . $book -> id);
 			$update = [];
@@ -42,15 +43,14 @@ class Controller extends BaseController
 	public function index( $ability, $arguments = [])
 	{
 		$result = null;
-//		if(!empty($_POST['searchword'])){
-		$_POST['searchword'] = 'book';
+		if(!empty($_POST['searchword'])){
 			$client = new \SphinxClient();
+
 			$result = $client -> Query($_POST['searchword'], 'paragraph');
-		var_dump($result);
 
-//		}
+		}
 
-		return view('lalala', ['result' => $result]);
+		return view('lalala', ['result' => $result, 'searchword' => $_POST['searchword']]);
 
 //
 //		exit('work');
@@ -60,5 +60,9 @@ class Controller extends BaseController
 //		exit;
 //
 //		echo view('lalala');
+	}
+
+	protected function getResults(){
+
 	}
 }
