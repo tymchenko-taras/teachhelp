@@ -10,12 +10,12 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+//
+//Route::get('/', function () {
+//	return 'Hello World';
+//});
 
-Route::get('/', function () {
-	return 'Hello World';
-});
-
-Route::any('/split', 'Controller@split');
+Route::any('/', 'Controller@split');
 Route::any('/user', 'Controller@index');
 
 Route::get('/rrr', function () {
