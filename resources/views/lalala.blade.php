@@ -16,11 +16,15 @@
 	<input type="submit">
 
 
-	@foreach($params as $id => $param)
-		<div data-id="{{$id}}" class="draggable drag-drop">{{$param['pretty']}}</div>
+	@foreach($patterns as $pattern)
+		<div>
+			<label>
+				<input type="checkbox" name="pattern[{{$pattern -> id}}]" value="1">
+				<span>{{$pattern -> name}}</span>
+			</label>
+		</div>
 	@endforeach
 
-	<div id="outer-dropzone" class="dropzone">
 
 </form>
 

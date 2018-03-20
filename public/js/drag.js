@@ -88,14 +88,17 @@ $(function(){
         var post = {
             'ajax': 'on',
         };
-        form.find('.draggable').each(function(){
-            var self = $(this);
-            post[ self.attr('data-id') ] = self.attr('data-x');
-        });
 
-        form.find('input').each(function(){
+        form.find('input').each(function() {
             var self = $(this);
-            post[ self.attr('name') ] = self.val();
+            if ((self.attr('type') == 'checkbox') && !self.is(':checked')) {
+                return true;
+            }
+            if(!self.attr('name')){
+                return true;
+            }
+
+            post[self.attr('name')] = self.val();
         });
 
         $.post(form.attr('action'), post, function(response){

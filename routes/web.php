@@ -21,3 +21,5 @@ Route::any('/user', 'Controller@index');
 Route::get('/rrr', function () {
     return view('welcome');
 });
+
+Route::resource('pattern','PatternController');

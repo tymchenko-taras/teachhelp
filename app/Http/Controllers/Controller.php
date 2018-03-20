@@ -14,6 +14,13 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs;
 
+    // regular_past_verb
+    // regular_continuous_verb
+    // irregular_past_verb
+    // irregular_participle_verb
+    // irregular_equal_verb
+    //
+
     protected $params = [
         'irregular_past_simple' => [
             'pretty' => '+ed / II col',
@@ -138,12 +145,27 @@ class Controller extends BaseController
 
 	public function index( $ability, $arguments = [])
     {
-        $result = $matches = $searchword = null;
+        $result = 'No results :(';
+        $matches = [];
+        $patterns = [];
+        $searchword = null;
+
+        if(!empty($_POST['pattern'])){
+            $items = DB::table('pattern')->whereIn('id', array_keys($_POST['pattern'])) -> get();
+            foreach($items as $item){
+                $patterns[] = '(' . $item -> value . ')';
+            }
+        }
         if (!empty($_POST['searchword'])) {
             $searchword = $_POST['searchword'];
-            $client = new \SphinxClient();
+        }
 
-            $data = $client->Query($searchword, 'paragraph');
+        $query = trim($searchword .' '. implode('|', $patterns));
+
+        if ($query) {
+            $client = new \SphinxClient();
+            $client->SetMatchMode(SPH_MATCH_EXTENDED);
+            $data = $client->Query($query, 'paragraph');
             if (!empty($data['matches'])) {
                 foreach ($data['matches'] as $id => $match) {
                     if (!empty($match['attrs']['content'])) {
@@ -155,12 +177,13 @@ class Controller extends BaseController
                 }
                 $result = view('result_table', ['matches' => $matches]);
             }
-
         }
+
         if (!empty($_POST['ajax'])) {
             echo $result;
         } else {
-            return view('lalala', ['params' => $this->params, 'result' => $result, 'searchword' => $searchword]);
+            $patterns = DB::select('select * from pattern');
+            return view('lalala', ['patterns' => $patterns, 'result' => $result, 'searchword' => $searchword]);
         }
 
 //
