@@ -1,47 +1,79 @@
-#outer-dropzone {
-    height: 140px;
+/* Space out content a bit */
+body {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
 }
 
-#inner-dropzone {
-    height: 80px;
+/* Everything but the jumbotron gets side spacing for mobile first views */
+.header,
+.marketing,
+.footer {
+    padding-right: 1rem;
+    padding-left: 1rem;
 }
 
-.dropzone {
-    background-color: #ccc;
-    border: dashed 4px transparent;
-    border-radius: 4px;
-    margin: 10px auto 30px;
-    padding: 10px;
-    width: 80%;
-    transition: background-color 0.3s;
+/* Custom page header */
+.header {
+    padding-bottom: 1rem;
+    border-bottom: .05rem solid #e5e5e5;
+}
+/* Make the masthead heading the same height as the navigation */
+.header h3 {
+    margin-top: 0;
+    margin-bottom: 0;
+    line-height: 3rem;
 }
 
-.drop-active {
-    border-color: #aaa;
+/* Custom page footer */
+.footer {
+    padding-top: 1.5rem;
+    color: #777;
+    border-top: .05rem solid #e5e5e5;
 }
 
-.drop-target {
-    background-color: #29e;
-    border-color: #fff;
-    border-style: solid;
+/* Customize container */
+@media (min-width: 48em) {
+    .container {
+        max-width: 46rem;
+    }
+}
+.container-narrow > hr {
+    margin: 2rem 0;
 }
 
-.drag-drop {
-    display: inline-block;
-    min-width: 40px;
-    padding: 2em 0.5em;
-
-    color: #fff;
-    background-color: #29e;
-    border: solid 2px #fff;
-
-    -webkit-transform: translate(0px, 0px);
-    transform: translate(0px, 0px);
-
-    transition: background-color 0.3s;
+/* Main marketing message and sign up button */
+.jumbotron {
+    text-align: center;
+    border-bottom: .05rem solid #e5e5e5;
+}
+.jumbotron .btn {
+    padding: .75rem 1.5rem;
+    font-size: 1.5rem;
 }
 
-.drag-drop.can-drop {
-    color: #000;
-    background-color: #4e4;
+/* Supporting marketing content */
+.marketing {
+    margin: 3rem 0;
+}
+.marketing p + h4 {
+    margin-top: 1.5rem;
+}
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 48em) {
+    /* Remove the padding we set earlier */
+    .header,
+    .marketing,
+    .footer {
+        padding-right: 0;
+        padding-left: 0;
+    }
+    /* Space out the masthead */
+    .header {
+        margin-bottom: 2rem;
+    }
+    /* Remove the bottom border on the jumbotron for visual effect */
+    .jumbotron {
+        border-bottom: 0;
+    }
 }

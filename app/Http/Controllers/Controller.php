@@ -139,12 +139,51 @@ class Controller extends BaseController
         }
     }
 
+	private function readTatoebaSentences(){
+        //11380
+
+        $update = [];
+        $i = 0;
+        $handle = fopen('/var/www/sentences.tar/sentences/sentences.csv', 'r');
+        if ($handle) {
+            while (!feof($handle)) {
+                if($line = fgets($handle)) {
+                    $line = explode("\t", $line);
+                    if(!empty($line[0]) && !empty($line[1]) && !empty($line[2])){
+                        if($line[1] == 'eng'){
+                            $update[] = ['external_id' => $line[0], 'content' => $line[2], 'book_id' => 11380];
+
+                            if(($i++ % 1000) == 0){
+                                DB::table('sentence') -> insert($update);
+                                $update = [];
+                            }
+                        }
+                    }
+                }
+            }
+
+            if($update){
+                DB::table('sentence') -> insert($update);
+            }
+
+            fclose($handle);
+        }
+    }
+
 	public function split( $ability, $arguments = []){
 
 	}
 
 	public function index( $ability, $arguments = [])
     {
+
+
+//        $this -> readTatoebaSentences();
+//        exit;
+
+
+
+
         $result = 'No results :(';
         $matches = [];
         $patterns = [];
@@ -161,10 +200,11 @@ class Controller extends BaseController
         }
 
         $query = trim($searchword .' '. implode('|', $patterns));
-
+//exit($query);
         if ($query) {
             $client = new \SphinxClient();
             $client->SetMatchMode(SPH_MATCH_EXTENDED);
+//            $client->SetLimits(0, 30);
             $data = $client->Query($query, 'paragraph');
             if (!empty($data['matches'])) {
                 foreach ($data['matches'] as $id => $match) {
@@ -183,7 +223,7 @@ class Controller extends BaseController
             echo $result;
         } else {
             $patterns = DB::select('select * from pattern');
-            return view('lalala', ['patterns' => $patterns, 'result' => $result, 'searchword' => $searchword]);
+            return view('layout', ['content' => view('search', ['patterns' => $patterns, 'result' => $result, 'searchword' => $searchword])]);
         }
 
 //

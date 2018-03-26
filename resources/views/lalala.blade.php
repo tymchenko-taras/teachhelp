@@ -28,7 +28,6 @@
 
 </form>
 
-</div>
 
 
 <div class="result">
