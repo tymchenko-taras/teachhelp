@@ -10,7 +10,7 @@
 		@foreach($matches as $match)
 			<tr>
 				<td> {{$match['id']}} </td>
-				<td> {{$match['content']}} </td>
+				<td> {!! $match['content'] !!} </td>
 			</tr>
 		@endforeach
 		</tbody>

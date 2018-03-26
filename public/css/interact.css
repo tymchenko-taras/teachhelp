@@ -77,3 +77,10 @@ body {
         border-bottom: 0;
     }
 }
+
+[name="searchword"]{
+    width: 500px;
+}
+.highlight{
+    background-color: rgba(0,0,0,.075);
+}

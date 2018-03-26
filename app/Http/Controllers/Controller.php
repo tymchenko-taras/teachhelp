@@ -204,16 +204,26 @@ class Controller extends BaseController
         if ($query) {
             $client = new \SphinxClient();
             $client->SetMatchMode(SPH_MATCH_EXTENDED);
-//            $client->SetLimits(0, 30);
+            $client->SetLimits(0, 1000);
+//            $client->SetFilter('itemid', [63660], 1);
             $data = $client->Query($query, 'paragraph');
+
+
+            $ex = [];
             if (!empty($data['matches'])) {
                 foreach ($data['matches'] as $id => $match) {
                     if (!empty($match['attrs']['content'])) {
+                        $ex[ $id ] = $match['attrs']['content'];
                         $matches[] = [
                             'id' => $id,
                             'content' => $match['attrs']['content'],
                         ];
                     }
+                }
+
+                $excerpts = $client -> BuildExcerpts($ex, 'paragraph', $query);
+                foreach($excerpts as $i => $excerpt){
+                    $matches[ $i ]['content'] = $excerpt;
                 }
                 $result = view('result_table', ['matches' => $matches]);
             }
@@ -222,8 +232,14 @@ class Controller extends BaseController
         if (!empty($_POST['ajax'])) {
             echo $result;
         } else {
-            $patterns = DB::select('select * from pattern');
-            return view('layout', ['content' => view('search', ['patterns' => $patterns, 'result' => $result, 'searchword' => $searchword])]);
+            $patterns = DB::select('select * from `pattern`');
+            $groups = DB::select('select * from `group`');
+            return view('layout', ['content' => view('search', [
+                'patterns' => $patterns,
+                'result' => $result,
+                'searchword' => $searchword,
+                'groups' => $groups,
+            ])]);
         }
 
 //
