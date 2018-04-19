@@ -203,6 +203,7 @@ class Controller extends BaseController
 //exit($query);
         if ($query) {
             $client = new \SphinxClient();
+            $client -> SetServer('container-sphinx', 9312);
             $client->SetMatchMode(SPH_MATCH_EXTENDED);
             $client->SetLimits(0, 1000);
 //            $client->SetFilter('itemid', [63660], 1);
