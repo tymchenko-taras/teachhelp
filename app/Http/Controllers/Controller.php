@@ -21,6 +21,31 @@ class Controller extends BaseController
     // irregular_equal_verb
     //
 
+    protected function getExpressions($ids = []){
+        $parts = [
+            'indefinite-adverbs' => '(always|usually|often|sometimes|rarely|never)',
+            'regular-continuous-verb' => '(?!\b(wing|king|interesting|something|spring|hawking|thing|anything|everything|nothing|ceiling|building|dressing|dwelling|feeling|filling|longing|meaning|morning|evening|pudding|shilling|wedding)\b)(\w+ing)',
+            '' => '(greeting|meeting|landing|opening|clearing|painting|saying|singing|swimming|suffering|warning|writing|hardening)',
+        ];
+
+        $expressions = [
+            [
+                'name' => 'Gerund plus be',
+                'expression' => implode('', [
+                    "\b{$parts['regular-continuous-verb']}\b",
+                    "(?!.*\b(to|us|at|as|it|\.|,|!|when).*\b)(.{0,20})",
+                    "\s*\b(is|was|has been|will be)\b"
+                ]),
+            ],
+        ];
+
+        if($ids){
+            $expressions = array_intersect_key($expressions, array_flip($ids));
+        }
+
+        return $expressions;
+    }
+
     protected $params = [
         'irregular_past_simple' => [
             'pretty' => '+ed / II col',
@@ -170,16 +195,74 @@ class Controller extends BaseController
         }
     }
 
-	public function split( $ability, $arguments = []){
 
+
+	public function buildDatFile(){
+        set_time_limit(1200);
+
+$nums = [];
+        for($i = 0;;$i += 10000) {
+            $sentences = DB::select($sql = "select `id`, `content` from `sentence` LIMIT $i, 10000");
+            if(empty($sentences)) break;
+
+            foreach($sentences as $sentence){
+                foreach($this->getExpressions() as $alias => $expression) {
+                    if($result = preg_match('#'. $expression['expression'] .'#i', $sentence->content)) {
+                        //echo $sentence->content, '<br>';
+                        if (!isset($nums[$alias])) {
+                            $nums[$alias] = pack('N', $sentence->id);
+                        } else {
+                            $nums[$alias] .= pack('N', $sentence->id);
+                        }
+                    }
+                }
+            }
+            file_put_contents('test.txt', $sql.PHP_EOL, FILE_APPEND);
+        }
+
+        ksort($nums);
+        // Сохраняем данные в файл
+        $fh = fopen('passports.dat', 'wb');
+        $data = (count($nums)*2) + 2;
+        $index = pack('n', $data);
+        fseek($fh, $data);
+        foreach($nums as $num){ // Цикл по всем номерам паспортов
+            $data += fwrite($fh, $num);
+            $index .= pack('n', $data);
+        }
+
+
+
+        fseek($fh, 0);
+        fwrite($fh, $index);
 	}
+
+    public function getFormDatFile($expressionIds){
+        $itemIds = [];
+        if($expressionIds) {
+            $fn = fopen('passports.dat', 'rb');
+            foreach($expressionIds as $expressionId) {
+                fseek($fn, $expressionId * 2);
+                $seek = unpack('nbegin/nend', fread($fn, 4));
+                fseek($fn, $seek['begin']);
+                $ids = fread($fn, $seek['end'] - $seek['begin']);
+                if($ids = unpack('N*', $ids)){
+                    $itemIds = array_merge($itemIds, $ids);
+                }
+            }
+
+            return array_unique($itemIds);
+        }
+    }
+
+	public function build( $ability, $arguments = []){
+        $this -> buildDatFile();
+        exit('done');
+    }
 
 	public function index( $ability, $arguments = [])
     {
 
-
-//        $this -> readTatoebaSentences();
-//        exit;
 
 
 
@@ -201,31 +284,33 @@ class Controller extends BaseController
 
         $query = trim($searchword .' '. implode('|', $patterns));
 //exit($query);
-        if ($query) {
+        if (1||$query) {
+            $expressionIds = [0];
             $client = new \SphinxClient();
             $client -> SetServer('container-sphinx', 9312);
             $client->SetMatchMode(SPH_MATCH_EXTENDED);
             $client->SetLimits(0, 1000);
-//            $client->SetFilter('itemid', [63660], 1);
+            $client->SetFilter('itemid', array_slice($this -> getFormDatFile($expressionIds), 0, 4096), 0);
+
             $data = $client->Query($query, 'paragraph');
 
-
-            $ex = [];
             if (!empty($data['matches'])) {
+
                 foreach ($data['matches'] as $id => $match) {
                     if (!empty($match['attrs']['content'])) {
-                        $ex[ $id ] = $match['attrs']['content'];
-                        $matches[] = [
-                            'id' => $id,
-                            'content' => $match['attrs']['content'],
-                        ];
+                        foreach($this -> getExpressions($expressionIds) as $expression) {
+                            $matches[] = [
+                                'id' => $id,
+                                'content' => preg_replace_callback(
+                                    '#' . $expression['expression'] . '#i',
+                                    function($matches){return '<b>'.$matches[0].'</b>';},
+                                    $match['attrs']['content']
+                                ),
+                            ];
+                        }
                     }
                 }
 
-                $excerpts = $client -> BuildExcerpts($ex, 'paragraph', $query);
-                foreach($excerpts as $i => $excerpt){
-                    $matches[ $i ]['content'] = $excerpt;
-                }
                 $result = view('result_table', ['matches' => $matches]);
             }
         }

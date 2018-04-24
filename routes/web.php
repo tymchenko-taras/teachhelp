@@ -17,6 +17,7 @@
 
 Route::any('/', 'Controller@split');
 Route::any('/user', 'Controller@index');
+Route::any('/build', 'Controller@build');
 
 Route::get('/rrr', function () {
     return view('welcome');
