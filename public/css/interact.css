@@ -84,3 +84,6 @@ body {
 .highlight{
     background-color: rgba(0,0,0,.075);
 }
+.highlight-word{
+    font-weight: bold;
+}
