@@ -31,7 +31,7 @@ abstract class Sphinx  extends Recordset {
             if(is_array($value)){
                 $value = array_values($value);
                 foreach($value as $i => $v){
-                    $value[ $i ] = "<items id='$i'>{htmlspecialchars($v)}</items>";
+                    $value[ $i ] = "<items id='$i'>$v</items>";
                 }
                 $value = PHP_EOL . implode(PHP_EOL, $value) . PHP_EOL;
             } else {
