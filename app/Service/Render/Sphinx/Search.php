@@ -56,8 +56,19 @@ class   Search extends \App\Service\Render\_Base\Sphinx {
         }
     }
 
+    protected function Prepare() {
+//        $this -> writer = new \App\Service\Render\Sphinx\SphinxXmlWriter();
+//        $this -> writer -> startXml();
+//        $this -> writer -> writeScheme($this -> fullTextFields, $this -> GetAttributes());
+    }
+    protected function Cleanup($ids) {
+        //$this -> writer -> endXml();
+    }
+
     protected function DefaultRender($ids) {
-        $batch = 30000;
+        $this -> startXml();
+
+        $batch = 40000;
         for($i = 0; ; $i += $batch) {
             $records = \DB::select("select `id`,`content` from `sentence` LIMIT $i, $batch");
             if (empty($records)) break;
@@ -72,9 +83,12 @@ class   Search extends \App\Service\Render\_Base\Sphinx {
                 }
 
                 $this->ProcessItem($record, $item);
-                $this -> writer -> writeDocument($item);
+//                $this -> writer -> writeDocument($item);
+                $this -> writeXmlItem($item);
             }
         }
+
+        $this -> endXml();
 
         return [];
     }

@@ -21,6 +21,43 @@ abstract class Sphinx  extends Recordset {
      */
     protected $writer = null;
 
+    protected function endXml(){
+        echo '</sphinx:docset>';
+    }
+
+    protected function writeXmlItem($item){
+        echo PHP_EOL, '<sphinx:document id="', $item['itemId'],'">';
+        foreach($item as $name => $value){
+            if(is_array($value)){
+                $value = array_values($value);
+                foreach($value as $i => $v){
+                    $value[ $i ] = "<items id='$i'>{htmlspecialchars($v)}</items>";
+                }
+                $value = PHP_EOL . implode(PHP_EOL, $value) . PHP_EOL;
+            } else {
+                $value = htmlspecialchars($value);
+            }
+
+            echo PHP_EOL, " <$name>$value</$name>";
+        }
+        echo PHP_EOL, '</sphinx:document>';
+    }
+
+    protected function startXml(){
+        echo '<?xml version="1.0" encoding="UTF-8"?>', PHP_EOL, ' <sphinx:docset>', PHP_EOL, '  <sphinx:schema>';
+        foreach($this -> fullTextFields as $item){
+            echo PHP_EOL, '   <sphinx:field name="'. $item .'"/>';
+        }
+        foreach($this -> GetAttributes() as $item){
+            echo PHP_EOL, '   <sphinx:attr';
+            foreach($item as $i => $v){
+                echo " $i='$v'";
+            }
+            echo '/>';
+        }
+        echo PHP_EOL, '  </sphinx:schema>';
+    }
+
     protected function GetAttributes() {
         $result = array(
             array('name' => 'itemId', 'type' => 'int', 'bits' => '32'),
