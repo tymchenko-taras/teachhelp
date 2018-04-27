@@ -257,6 +257,7 @@ $nums = [];
     }
 
 	public function xml(){
+        ini_set('max_execution_time', 3000);
         $render = new \App\Service\Render\Sphinx\Search();
         $render -> Render();
     }
@@ -277,7 +278,7 @@ $nums = [];
         }
 
         if (!empty($_POST['pattern'])) {
-            $desiredPatterns = $_POST['pattern'];
+            $desiredPatterns = array_keys($_POST['pattern']);
         }
 
         if ($desiredQuery || $desiredPatterns) {

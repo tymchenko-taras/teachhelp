@@ -9,9 +9,11 @@
 
 namespace App\Service\Render\Sphinx;
 
-class Search extends \App\Service\Render\_Base\Sphinx {
+class   Search extends \App\Service\Render\_Base\Sphinx {
 
     protected $fullTextFields = array('content');
+    protected $processBatchSize = 0;
+    protected $saveBatchSize = 0;
 
     protected function GetAttributes() {
         $result = array(
@@ -35,16 +37,11 @@ class Search extends \App\Service\Render\_Base\Sphinx {
     }
 
     public function GetIds() {
-        $items = \DB::select('select `id`, `content` from `sentence` LIMIT 2000');
-        foreach($items as $i => $item){
-            $items[ $i ] = (array)$item;
-        }
-
-        return $items;
+        return [1];
     }
 
     protected function ProcessItem($record, &$item) {
-        $item['content'] = $record['content'];
+        $item['content'] = $record->content;
         $item['b1'] = [];
         foreach($this -> getExpressions() as $expression) {
             if($result = preg_match('#'. $expression['expression'] .'#i', $item['content'])) {
@@ -57,6 +54,29 @@ class Search extends \App\Service\Render\_Base\Sphinx {
                 ? $record['__translation']['SortIndex'][$lang -> Id]
                 : $record['SortIndex'];
         }
+    }
+
+    protected function DefaultRender($ids) {
+        $batch = 30000;
+        for($i = 0; ; $i += $batch) {
+            $records = \DB::select("select `id`,`content` from `sentence` LIMIT $i, $batch");
+            if (empty($records)) break;
+
+            foreach ($records as $record) {
+                $item = array(
+                    'itemId' => $record -> id,
+                );
+                foreach ($this->fullTextFields as $field) {
+                    $text = !empty($record->{$field}) ? $record->{$field} : null;
+                    $item[$field] = $text;
+                }
+
+                $this->ProcessItem($record, $item);
+                $this -> writer -> writeDocument($item);
+            }
+        }
+
+        return [];
     }
 
 }
