@@ -34,10 +34,7 @@ abstract class Sphinx  extends Recordset {
                     $value[ $i ] = "<items id='$i'>$v</items>";
                 }
                 $value = PHP_EOL . implode(PHP_EOL, $value) . PHP_EOL;
-            } else {
-                $value = htmlspecialchars($value);
             }
-
             echo PHP_EOL, " <$name>$value</$name>";
         }
         echo PHP_EOL, '</sphinx:document>';

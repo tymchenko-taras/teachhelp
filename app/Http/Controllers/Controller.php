@@ -265,7 +265,12 @@ $nums = [];
 	public function index( $ability, $arguments = [])
     {
 
-
+//        echo '<pre>';
+//        $text = "I don't know why the meeting was postponed.";
+//        preg_match('#(?!(the|are|is))\b(?!\b(wing|wedding)\b)(\w+ing)\b#i', $text, $matches);
+//        print_R($matches);
+//
+//        exit;
         $result = 'No results :(';
         $matches = [];
         $patterns = $this -> getPatterns();
@@ -294,7 +299,7 @@ $nums = [];
 
 
             if (!empty($data['matches'])) {
-
+echo count($data['matches']);
                 foreach ($data['matches'] as $id => $match) {
                     if (!empty($match['attrs']['content'])) {
                         $highlights = [];

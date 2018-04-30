@@ -41,7 +41,6 @@ class   Search extends \App\Service\Render\_Base\Sphinx {
     }
 
     protected function ProcessItem($record, &$item) {
-        $item['content'] = $record->content;
         $item['b1'] = [];
         foreach($this -> getExpressions() as $expression) {
             if($result = preg_match('#'. $expression['expression'] .'#i', $item['content'])) {
@@ -69,7 +68,7 @@ class   Search extends \App\Service\Render\_Base\Sphinx {
         $this -> startXml();
 
         $batch = 40000;
-        for($i = 0; ; $i += $batch) {
+        for($i = 0; $i<1; $i += $batch) {
             $records = \DB::select("select `id`,`content` from `sentence` LIMIT $i, $batch");
             if (empty($records)) break;
 
@@ -79,7 +78,7 @@ class   Search extends \App\Service\Render\_Base\Sphinx {
                 );
                 foreach ($this->fullTextFields as $field) {
                     $text = !empty($record->{$field}) ? $record->{$field} : null;
-                    $item[$field] = $text;
+                    $item[$field] = htmlspecialchars($text);
                 }
 
                 $this->ProcessItem($record, $item);
