@@ -19,6 +19,7 @@ Route::any('/', 'Controller@split');
 Route::any('/user', 'Controller@index');
 Route::any('/build', 'Controller@build');
 Route::any('/xml', 'Controller@xml');
+Route::any('/set/sentence-gc', 'Controller@setSentenceGC');
 
 Route::get('/rrr', function () {
     return view('welcome');

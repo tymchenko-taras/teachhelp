@@ -72,7 +72,7 @@ class Sentence {
             // after ing word another words are allowed, but not end of the sentence.
             $expression .= '(?!(\.|,|!|"|;))(.{0,40})';
 
-            // finally "be" word
+            // finally the "be" word
             $expression .= '\s\b(is|was|has been|will be)\b';
 
             $expressions[] = [

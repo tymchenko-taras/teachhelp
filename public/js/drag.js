@@ -1,10 +1,17 @@
 $(function(){
-    $('body').on('click', '.table.table-hover tr', function(){
-        var post = {};
-        var row = $(this);
-        row.toggleClass('highlight');
-        $.post('/chose', post, function(response){
+    $('body').on('change', '.switch [data-id][type="checkbox"]', function(){
+        var checkox = $(this);
+        var post = {
+            '_token': $('[name="_token"]').val(),
+            'data': {
+                'sid': checkox.attr('data-id'),
+                'gcid': 1,
+                'value': +checkox.is(':checked')
+            }
+        };
 
+        $.post('/set/sentence-gc', post, function(response){
+            checkox.attr('data-assigned', '1');
         })
     });
 

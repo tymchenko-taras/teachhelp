@@ -68,7 +68,7 @@ class   Search extends \App\Service\Render\_Base\Sphinx {
         $this -> startXml();
 
         $batch = 40000;
-        for($i = 0; $i<1; $i += $batch) {
+        for($i = 0; ; $i += $batch) {
             $records = \DB::select("select `id`,`content` from `sentence` LIMIT $i, $batch");
             if (empty($records)) break;
 

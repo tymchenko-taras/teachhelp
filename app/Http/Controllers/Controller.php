@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Service\Sentence;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -262,12 +263,26 @@ $nums = [];
         $render -> Render();
     }
 
+	public function setSentenceGC( $ability, $arguments = []) {
+        if(!empty($_POST['data'])) {
+            $sql = 'INSERT INTO `sentence_grammar_construction`
+                    (sentence_id, grammar_construction_id, user_id, `value`) VALUES (:sid, :gcid, :uid, :value) 
+                    ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)';
+
+
+            DB::insert($sql, $_POST['data'] + ['uid' => 1]);
+        }
+    }
+
 	public function index( $ability, $arguments = [])
     {
 
+
+
 //        echo '<pre>';
-//        $text = "I don't know why the meeting was postponed.";
-//        preg_match('#(?!(the|are|is))\b(?!\b(wing|wedding)\b)(\w+ing)\b#i', $text, $matches);
+//        $text = "Ptsdfg";
+//        preg_match('#(?P<word>t[^s]+)#i', $text, $matches);
+////echo         preg_replace('#(?P<word>t[^s]+)#i', '<span class="highlight-word">$0</span>', $text);
 //        print_R($matches);
 //
 //        exit;
@@ -299,30 +314,37 @@ $nums = [];
 
 
             if (!empty($data['matches'])) {
-echo count($data['matches']);
-                foreach ($data['matches'] as $id => $match) {
-                    if (!empty($match['attrs']['content'])) {
-                        $highlights = [];
-                        foreach($patterns as $pattern){
-                            if(in_array($pattern['id'], $desiredPatterns)) {
-                                $highlights[] = $pattern['expression'];
-                            }
-                        }
-                        if($desiredQuery){
-                            $highlights[] = $desiredQuery;
-                        }
-                        $content = $match['attrs']['content'];
-                        foreach($highlights as $highlight) {
+                echo count($data['matches']);
 
-                            $content = preg_replace('#' . $highlight . '#i', '<span class="highlight-word">$0</span>', $content);
+                $sentences = DB::select("
+                    SELECT s.id, s.content, sgc.`value`
+                    FROM `sentence` s left join sentence_grammar_construction sgc on s.id = sgc.sentence_id and sgc.grammar_construction_id = 1
+                    WHERE
+                        s.`id` IN (".implode(',', array_keys($data['matches'])).") 
+                    ORDER BY FIELD(s.`id`, ". implode(',', array_keys($data['matches'])) .")
+                ");
+
+                foreach ($sentences as $sentence) {
+                    $highlights = [];
+                    foreach($patterns as $pattern){
+                        if(in_array($pattern['id'], $desiredPatterns)) {
+                            $highlights[] = $pattern['expression'];
                         }
-
-                        $matches[] = [
-                            'id' => $id,
-                            'content' => $content,
-                        ];
-
                     }
+                    if($desiredQuery){
+                        $highlights[] = $desiredQuery;
+                    }
+                    $content = $sentence -> content;
+                    foreach($highlights as $highlight) {
+
+                        $content = preg_replace('#' . $highlight . '#i', '<span class="highlight-word">$0</span>', $content);
+                    }
+
+                    $matches[] = [
+                        'id' => $sentence->id,
+                        'content' => $content,
+                        'value' => $sentence->value,
+                    ];
                 }
 
                 $result = view('result_table', ['matches' => $matches]);
