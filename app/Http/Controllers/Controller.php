@@ -265,12 +265,20 @@ $nums = [];
 
 	public function setSentenceGC( $ability, $arguments = []) {
         if(!empty($_POST['data'])) {
-            $sql = 'INSERT INTO `sentence_grammar_construction`
-                    (sentence_id, grammar_construction_id, user_id, `value`) VALUES (:sid, :gcid, :uid, :value) 
-                    ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)';
-
-
-            DB::insert($sql, $_POST['data'] + ['uid' => 1]);
+            if(isset($_POST['data']['value'])) {
+                $sql = 'INSERT INTO `sentence_grammar_construction`
+                        (sentence_id, grammar_construction_id, user_id, `value`) VALUES (:sid, :gcid, :uid, :value)
+                        ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)';
+            } elseif (isset($_POST['data']['comment'])){
+                $sql = 'INSERT INTO `sentence_grammar_construction`
+                        (sentence_id, grammar_construction_id, user_id, `comment`) VALUES (:sid, :gcid, :uid, :comment)
+                        ON DUPLICATE KEY UPDATE `comment` = VALUES(`comment`)';
+            } else {
+                $sql = '';
+            }
+            if($sql){
+                DB::insert($sql, $_POST['data'] + ['uid' => 1]);
+            }
         }
     }
 
@@ -307,17 +315,17 @@ $nums = [];
             $client->SetMatchMode(SPH_MATCH_EXTENDED);
             $client->SetLimits(0, 1000);
             if ($desiredPatterns){
-                $client->SetFilter('b1', $desiredPatterns);
+                $client->SetFilter('flags_t', $desiredPatterns);
             }
 
-            $data = $client->Query($desiredQuery, 'paragraph');
+            $data = $client->Query($desiredQuery, 'paragraph_rt');
 
 
             if (!empty($data['matches'])) {
                 echo count($data['matches']);
 
                 $sentences = DB::select("
-                    SELECT s.id, s.content, sgc.`value`
+                    SELECT s.id, s.content, sgc.`value`,sgc.`comment`
                     FROM `sentence` s left join sentence_grammar_construction sgc on s.id = sgc.sentence_id and sgc.grammar_construction_id = 1
                     WHERE
                         s.`id` IN (".implode(',', array_keys($data['matches'])).") 
@@ -344,6 +352,7 @@ $nums = [];
                         'id' => $sentence->id,
                         'content' => $content,
                         'value' => $sentence->value,
+                        'comment' => $sentence->comment,
                     ];
                 }
 

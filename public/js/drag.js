@@ -15,6 +15,21 @@ $(function(){
         })
     });
 
+    $('body').on('blur', 'textarea', function(){
+        var input = $(this);
+        var post = {
+            '_token': $('[name="_token"]').val(),
+            'data': {
+                'sid': input.attr('data-id'),
+                'gcid': 1,
+                'comment': input.val()
+            }
+        };
+
+        $.post('/set/sentence-gc', post, function(response){
+        })
+    });
+
 
     $('.klsjdfb').on('submit', function(){
         var form = $(this);

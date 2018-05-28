@@ -18,6 +18,9 @@
 						<span class="slider round"></span>
 					</label>
 				</td>
+                <td>
+                    <textarea data-id="{{$match['id']}}">{{$match['comment']}}</textarea>
+                </td>
 			</tr>
 		@endforeach
 		</tbody>
